@@ -1,0 +1,5 @@
+import { redirect } from "next/navigation";
+
+export default function LeavePage() {
+  redirect("/dashboard/employee/leave");
+}
