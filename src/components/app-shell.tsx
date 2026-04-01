@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { LiveClock } from "@/components/live-clock";
 
 type SessionRole = "HR" | "EMPLOYEE";
 
@@ -217,8 +218,8 @@ export function AppShell({ role, name, email, children }: ShellProps) {
             <IconMenu />
           </button>
 
-          {/* Search */}
-          <div className="flex flex-1 items-center gap-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 text-sm text-[#64748b] md:max-w-xs">
+          {/* Search — hidden on mobile */}
+          <div className="hidden flex-1 items-center gap-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 text-sm text-[#64748b] sm:flex sm:max-w-xs">
             <IconSearch />
             <input
               type="text"
@@ -227,7 +228,9 @@ export function AppShell({ role, name, email, children }: ShellProps) {
             />
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            {/* Live IST clock */}
+            <LiveClock variant="header" />
             {/* Bell */}
             <button
               type="button"
@@ -236,7 +239,7 @@ export function AppShell({ role, name, email, children }: ShellProps) {
               <IconBell />
             </button>
             {/* Avatar */}
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
               {initials}
             </div>
           </div>

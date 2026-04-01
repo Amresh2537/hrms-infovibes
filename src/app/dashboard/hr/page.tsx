@@ -53,7 +53,7 @@ export default async function HrDashboardPage() {
   ];
 
   return (
-    <div className="space-y-8 p-6 md:p-8">
+    <div className="space-y-6 p-4 sm:p-6 md:p-8">
 
       {/* Page header */}
       <div>
@@ -105,7 +105,7 @@ export default async function HrDashboardPage() {
       </div>
 
       {/* Attendance + pending leaves */}
-      <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-[#e2e8f0] px-6 py-4">

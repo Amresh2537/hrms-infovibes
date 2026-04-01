@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { LiveClock } from "@/components/live-clock";
 
 type Position = {
   lat: number;
@@ -81,8 +82,13 @@ export function AttendanceActions({ hasCheckedIn }: { hasCheckedIn: boolean }) {
 
   return (
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
-      <h2 className="text-base font-semibold text-[#1e293b]">Attendance</h2>
-      <p className="mt-0.5 text-xs text-[#64748b]">Mark your check-in and check-out for today.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-[#1e293b]">Attendance</h2>
+          <p className="mt-0.5 text-xs text-[#64748b]">Mark your check-in and check-out for today.</p>
+        </div>
+        <LiveClock variant="header" />
+      </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           type="button"

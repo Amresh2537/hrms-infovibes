@@ -29,7 +29,7 @@ export default async function ReportsPage() {
 
   return (
     <AppShell role={session.role} name={session.name} email={session.email}>
-      <div className="p-6 md:p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#1e293b]">Reports</h1>
           <p className="mt-1 text-sm text-[#64748b]">

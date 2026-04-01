@@ -11,7 +11,7 @@ export default async function HrEmployeesPage() {
   const employees = await Employee.find().sort({ createdAt: -1 }).lean();
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -34,7 +34,7 @@ export default async function HrEmployeesPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         {/* Employee table */}
         <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
           <div className="overflow-x-auto">

@@ -34,7 +34,7 @@ export default async function EmployeeLeavePage() {
   const slUsed = leaves.filter((l) => l.type === "SL" && l.status === "Approved").length;
 
   return (
-    <div className="space-y-6 p-6 md:p-8">
+    <div className="space-y-6 p-4 sm:p-6 md:p-8">
       {/* Header */}
       <div>
         <div className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0f766e]">

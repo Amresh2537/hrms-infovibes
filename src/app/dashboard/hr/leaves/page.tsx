@@ -25,7 +25,7 @@ function dayCount(from: string, to: string) {
 }
 
 function fmt(val: string) {
-  return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(val));
+  return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" }).format(new Date(val));
 }
 
 const statusCls: Record<string, string> = {
@@ -81,7 +81,7 @@ export default function HrLeavesPage() {
   const rejected = leaves.filter((l) => l.status === "Rejected").length;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#1e293b]">Leave Management System</h1>
         <p className="mt-1 text-sm text-[#64748b]">Process employee leave applications</p>

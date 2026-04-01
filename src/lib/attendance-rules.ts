@@ -35,7 +35,11 @@ export function resolveStatusFromRules(
 ): AttendanceStatus {
   if (!isInsideRadius) return "Outside Location";
 
-  const totalMinutes = checkInTime.getHours() * 60 + checkInTime.getMinutes();
+  // Compute IST wall-clock minutes since midnight
+  const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
+  const istTime = new Date(checkInTime.getTime() + IST_OFFSET_MS);
+  const totalMinutes = istTime.getUTCHours() * 60 + istTime.getUTCMinutes();
+
   const absentMinutes = timeToMinutes(rules.absentAfter);
   const halfDayMinutes = timeToMinutes(rules.halfDayAfter);
   const lateMinutes = timeToMinutes(rules.lateMarkAfter);

@@ -17,7 +17,7 @@ type AttendanceRow = {
 
 function fmt(val: string | null) {
   if (!val) return "-";
-  return new Intl.DateTimeFormat("en-IN", { timeStyle: "short" }).format(new Date(val));
+  return new Intl.DateTimeFormat("en-IN", { timeStyle: "short", timeZone: "Asia/Kolkata" }).format(new Date(val));
 }
 
 function todayIso() {
@@ -79,7 +79,7 @@ export default function HrAttendancePage() {
   ];
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#1e293b]">Attendance Management</h1>
         <p className="mt-1 text-sm text-[#64748b]">
@@ -115,7 +115,7 @@ export default function HrAttendancePage() {
           </button>
         </div>
 
-        <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-wrap items-end gap-3">
           {filterMode === "single" ? (
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Date</label>

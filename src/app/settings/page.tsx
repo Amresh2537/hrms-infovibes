@@ -106,7 +106,7 @@ export default async function SettingsPage() {
 
   return (
     <AppShell role={session.role} name={session.name} email={session.email}>
-      <div className="p-6 md:p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-[#0f172a]">Settings</h1>
           <p className="mt-0.5 text-sm text-[#64748b]">Manage your system settings</p>

@@ -47,8 +47,10 @@ export async function POST(request: NextRequest) {
 
     const now = new Date();
 
-    // Block check-in after the absentAfter threshold
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    // Block check-in after the absentAfter threshold (compare in IST)
+    const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
+    const nowIST = new Date(now.getTime() + IST_OFFSET_MS);
+    const nowMinutes = nowIST.getUTCHours() * 60 + nowIST.getUTCMinutes();
     const absentMinutes = timeToMinutes(rules.absentAfter);
     if (nowMinutes >= absentMinutes) {
       return jsonError(

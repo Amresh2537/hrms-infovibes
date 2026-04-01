@@ -23,9 +23,9 @@ export default async function EmployeeDashboardPage() {
   const todayStatus = data.todayAttendance?.status ?? "Not marked";
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[#1e293b]">My Dashboard</h1>
           <p className="mt-1 text-sm text-[#64748b]">Welcome back, {data.employee.name}</p>
@@ -89,7 +89,7 @@ export default async function EmployeeDashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_1.4fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <div className="space-y-6">
           <AttendanceActions hasCheckedIn={Boolean(data.todayAttendance?.checkInTime)} />
           <LeaveForm />
