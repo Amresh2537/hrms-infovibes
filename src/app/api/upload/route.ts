@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { requireRole } from "@/lib/auth";
+import { requireSession } from "@/lib/auth";
 import { handleRouteError, jsonOk } from "@/lib/api";
 
 const ALLOWED_MIME = new Set([
@@ -20,7 +20,7 @@ function sanitizeFilename(name: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole("HR");
+    await requireSession();
 
     const formData = await request.formData();
     const file = formData.get("file");

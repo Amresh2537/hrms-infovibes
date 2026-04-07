@@ -9,6 +9,7 @@ type LeaveRow = {
   fromDate: string;
   toDate: string;
   reason: string;
+  proofUrl?: string;
   status: "Pending" | "Approved" | "Rejected";
   createdAt: string;
   employeeId?: {
@@ -146,6 +147,7 @@ export default function HrLeavesPage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Leave Type</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Duration</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Reason</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Proof</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Actions</th>
                 </tr>
@@ -153,7 +155,7 @@ export default function HrLeavesPage() {
               <tbody className="divide-y divide-[#e2e8f0]">
                 {leaves.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-[#64748b]">
+                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-[#64748b]">
                       No leave applications found.
                     </td>
                   </tr>
@@ -191,6 +193,15 @@ export default function HrLeavesPage() {
                         </td>
                         <td className="max-w-[180px] px-6 py-4 text-[#475569]">
                           <div className="truncate">{leave.reason}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#475569]">
+                          {leave.proofUrl ? (
+                            <a href={leave.proofUrl} target="_blank" rel="noreferrer" className="font-medium text-brand hover:underline">
+                              View Proof
+                            </a>
+                          ) : (
+                            <span className="text-[#94a3b8]">No proof</span>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <span

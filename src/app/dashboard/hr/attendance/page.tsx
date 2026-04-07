@@ -10,9 +10,13 @@ type AttendanceRow = {
   designation: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: "Present" | "Absent" | "Late" | "Outside Location";
+  status: "Present" | "Absent" | "Late" | "Outside Location" | "WorkFromHome";
   location: { lat: number; lng: number } | null;
   distanceFromOffice: number | null;
+  isWFH: boolean;
+  lastActiveAt: string | null;
+  selfieUrl: string | null;
+  checkOutSelfieUrl: string | null;
 };
 
 function fmt(val: string | null) {
@@ -29,7 +33,17 @@ const statusClsMap: Record<string, string> = {
   Late: "bg-[#fef9c3] text-[#854d0e]",
   Absent: "bg-[#fee2e2] text-[#991b1b]",
   "Outside Location": "bg-[#e0e7ff] text-[#0f766e]",
+  WorkFromHome: "bg-[#dbeafe] text-[#1d4ed8]",
 };
+
+function fmtDateTime(val: string | null) {
+  if (!val) return "-";
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(new Date(val));
+}
 
 export default function HrAttendancePage() {
   const today = todayIso();
@@ -203,13 +217,15 @@ export default function HrAttendancePage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Check In</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Check Out</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Distance</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">WFH Activity</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Proof</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]">
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-[#64748b]">
+                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-[#64748b]">
                       No records found for the selected period.
                     </td>
                   </tr>
@@ -238,7 +254,28 @@ export default function HrAttendancePage() {
                       </td>
                       <td className="px-6 py-4 text-[#475569]">{fmt(row.checkOutTime)}</td>
                       <td className="px-6 py-4 text-xs text-[#475569]">
-                        {row.distanceFromOffice != null ? `${row.distanceFromOffice} m` : "—"}
+                        {row.isWFH ? "WFH" : row.distanceFromOffice != null ? `${row.distanceFromOffice} m` : "—"}
+                      </td>
+                      <td className="px-6 py-4 text-xs text-[#475569]">
+                        {row.isWFH ? fmtDateTime(row.lastActiveAt) : "—"}
+                      </td>
+                      <td className="px-6 py-4 text-xs text-[#475569]">
+                        <div className="flex flex-col gap-1">
+                          {row.selfieUrl ? (
+                            <a href={row.selfieUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] hover:underline">
+                              Check-in Proof
+                            </a>
+                          ) : (
+                            <span className="text-[#94a3b8]">Check-in: -</span>
+                          )}
+                          {row.checkOutSelfieUrl ? (
+                            <a href={row.checkOutSelfieUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] hover:underline">
+                              Check-out Proof
+                            </a>
+                          ) : (
+                            <span className="text-[#94a3b8]">Check-out: -</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <span

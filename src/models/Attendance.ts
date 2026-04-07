@@ -12,10 +12,14 @@ const attendanceSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Present", "Absent", "Late", "Half Day", "Outside Location"],
+      enum: ["Present", "Absent", "Late", "Half Day", "Outside Location", "WorkFromHome"],
       default: "Present",
     },
     distanceFromOffice: { type: Number, default: 0 },
+    selfieUrl: { type: String },
+    checkOutSelfieUrl: { type: String },
+    isWFH: { type: Boolean, default: false },
+    lastActiveAt: { type: Date },
   },
   {
     timestamps: true,

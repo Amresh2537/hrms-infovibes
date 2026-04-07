@@ -12,6 +12,7 @@ const leaveSchema = new Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+    proofUrl: { type: String },
   },
   {
     timestamps: true,

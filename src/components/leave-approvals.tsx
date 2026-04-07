@@ -8,6 +8,7 @@ type LeaveRow = {
   type: string;
   fromDate: string | Date;
   toDate: string | Date;
+  proofUrl?: string;
   employeeId?: {
     name?: string;
     empCode?: string;
@@ -63,6 +64,11 @@ export function LeaveApprovals({ leaves }: { leaves: LeaveRow[] }) {
                 <div className="truncate text-xs text-[#64748b]">
                   {leave.employeeId?.department ?? "-"}
                 </div>
+                {leave.proofUrl ? (
+                  <a href={leave.proofUrl} target="_blank" rel="noreferrer" className="mt-1 inline-block truncate text-xs font-medium text-brand hover:underline">
+                    View Proof
+                  </a>
+                ) : null}
               </div>
               <div className="flex shrink-0 gap-2">
                 <button

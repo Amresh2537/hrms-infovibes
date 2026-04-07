@@ -170,7 +170,6 @@ export function CreateEmployeeForm({ branches }: { branches: BranchOption[] }) {
                   ["department", "Department", "text"],
                   ["designation", "Designation / Position", "text"],
                   ["joinDate", "Date of Joining", "date"],
-                  ["workingStatus", "Working Status", "text"],
                   ["leavesBenefit", "Leaves Benefit", "text"],
                   ["daysWorking", "No of Days Working", "text"],
                   ["password", "Employee Password", "password"],
@@ -197,6 +196,24 @@ export function CreateEmployeeForm({ branches }: { branches: BranchOption[] }) {
                     />
                   </label>
                 ))}
+
+                <label className="block space-y-1.5 text-sm font-medium text-[#374151]">
+                  <span>Working Status</span>
+                  <select
+                    value={form.workingStatus}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        workingStatus: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 text-sm outline-none transition focus:border-brand focus:bg-white"
+                  >
+                    <option value="WFH">WFH</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Full-time">Full-time</option>
+                  </select>
+                </label>
 
                 <label className="block space-y-1.5 text-sm font-medium text-[#374151]">
                   <span>Working Location (Branch)</span>

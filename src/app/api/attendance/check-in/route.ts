@@ -30,10 +30,6 @@ export async function POST(request: NextRequest) {
       return jsonError("Employee not found.", 404);
     }
 
-    if (!employee.workLocation) {
-      return jsonError("Work location is not configured for this employee.", 400);
-    }
-
     const todayStart = startOfDay();
     const todayEnd = endOfDay();
     const existingAttendance = await Attendance.findOne({
@@ -59,6 +55,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // WFH path – no geo check required
+    if (payload.isWFH) {
+      const attendance = await Attendance.findOneAndUpdate(
+        { employeeId: employee._id, date: todayStart },
+        {
+          employeeId: employee._id,
+          date: todayStart,
+          checkInTime: now,
+          status: "WorkFromHome",
+          isWFH: true,
+          distanceFromOffice: 0,
+          lastActiveAt: now,
+          ...(payload.selfieUrl ? { selfieUrl: payload.selfieUrl } : {}),
+        },
+        { upsert: true, new: true, runValidators: true },
+      ).lean();
+      return jsonOk({ attendance });
+    }
+
+    // Office check-in – geo check required
+    if (!employee.workLocation) {
+      return jsonError("Work location is not configured for this employee.", 400);
+    }
+
+    if (payload.lat == null || payload.lng == null) {
+      return jsonError("Location coordinates are required for office check-in.", 400);
+    }
+
     const distance = haversineDistanceInMeters(
       employee.workLocation.lat,
       employee.workLocation.lng,
@@ -79,7 +103,9 @@ export async function POST(request: NextRequest) {
           lng: payload.lng,
         },
         status,
+        isWFH: false,
         distanceFromOffice: Math.round(distance),
+        ...(payload.selfieUrl ? { selfieUrl: payload.selfieUrl } : {}),
       },
       { upsert: true, new: true, runValidators: true },
     ).lean();

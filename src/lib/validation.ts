@@ -25,7 +25,7 @@ export const resetPasswordSchema = z.object({
 export const employeeSchema = z.object({
   name: z.string().min(2),
   empCode: z.string().min(2),
-  email: z.email(),
+  email: z.string().trim().min(1),
   officialEmail: z.string().optional(),
   phone: z.string().min(6),
   altPhone: z.string().optional(),
@@ -79,17 +79,22 @@ export const employeeSchema = z.object({
 });
 
 export const attendanceCheckInSchema = z.object({
-  lat: z.number(),
-  lng: z.number(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  selfieUrl: z.string().optional(),
+  isWFH: z.boolean().optional(),
 });
 
-export const attendanceCheckOutSchema = z.object({});
+export const attendanceCheckOutSchema = z.object({
+  selfieUrl: z.string().optional(),
+});
 
 export const leaveSchema = z.object({
   type: z.enum(["CL", "SL", "Other"]),
   fromDate: z.string(),
   toDate: z.string(),
   reason: z.string().min(4),
+  proofUrl: z.string().optional(),
 });
 
 export const leaveApprovalSchema = z.object({

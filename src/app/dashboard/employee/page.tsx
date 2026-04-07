@@ -93,6 +93,7 @@ export default async function EmployeeDashboardPage() {
         <div className="space-y-6">
           <AttendanceActions
             hasCheckedIn={Boolean(data.todayAttendance?.checkInTime)}
+            isWFHToday={Boolean(data.todayAttendance?.isWFH)}
             employeeName={data.employee.name}
             officePosition={
               data.employee.workLocation

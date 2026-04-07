@@ -136,6 +136,7 @@ export default async function EmployeeAttendancePage() {
           )}
           <AttendanceActions
             hasCheckedIn={Boolean(todayAttendance?.checkInTime)}
+             isWFHToday={Boolean(todayAttendance?.isWFH)}
             employeeName={employee.name}
             shiftStart={rules.officeStartTime}
             shiftEnd={rules.officeEndTime}

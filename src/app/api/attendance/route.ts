@@ -64,6 +64,10 @@ export async function GET(request: NextRequest) {
         status: record?.status ?? "Absent",
         location: record?.location ?? null,
         distanceFromOffice: record?.distanceFromOffice ?? null,
+        isWFH: record?.isWFH ?? false,
+        lastActiveAt: record?.lastActiveAt ?? null,
+        selfieUrl: record?.selfieUrl ?? null,
+        checkOutSelfieUrl: record?.checkOutSelfieUrl ?? null,
       };
     });
 

@@ -1,12 +1,17 @@
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { handleRouteError, jsonError, jsonOk } from "@/lib/api";
 import { requireSession } from "@/lib/auth";
 import { endOfDay, startOfDay } from "@/lib/date";
+import { attendanceCheckOutSchema } from "@/lib/validation";
 import Attendance from "@/models/Attendance";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const session = await requireSession();
+
+    const body = await request.json().catch(() => ({}));
+    const payload = attendanceCheckOutSchema.parse(body);
 
     if (!session.employeeId) {
       return jsonError("Employee profile is not linked to this account.", 400);
@@ -30,6 +35,7 @@ export async function POST() {
     }
 
     attendance.checkOutTime = new Date();
+    if (payload.selfieUrl) attendance.checkOutSelfieUrl = payload.selfieUrl;
     await attendance.save();
 
     return jsonOk({ attendance });

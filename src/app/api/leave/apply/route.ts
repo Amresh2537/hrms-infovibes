@@ -26,9 +26,11 @@ export async function POST(request: NextRequest) {
 
     const leave = await Leave.create({
       employeeId: employee._id,
-      ...payload,
+      type: payload.type,
       fromDate: new Date(payload.fromDate),
       toDate: new Date(payload.toDate),
+      reason: payload.reason,
+      ...(payload.proofUrl ? { proofUrl: payload.proofUrl } : {}),
     });
 
     return jsonOk({ leave }, 201);
