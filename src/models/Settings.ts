@@ -19,6 +19,17 @@ const holidaySchema = new Schema(
   { _id: true },
 );
 
+const branchSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    address: { type: String, default: "", trim: true },
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
+    radius: { type: Number, default: 500 },
+  },
+  { _id: true },
+);
+
 const settingsSchema = new Schema(
   {
     // Company
@@ -50,6 +61,7 @@ const settingsSchema = new Schema(
       address: { type: String, default: "", trim: true },
       allowRemoteCheckIn: { type: Boolean, default: false },
     },
+    branches: { type: [branchSchema], default: [] },
 
     // Working hours
     workingHours: {

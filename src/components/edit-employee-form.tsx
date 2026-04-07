@@ -26,6 +26,15 @@ type Documents = {
   upiScannerUrl: string;
 };
 
+type BranchOption = {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  radius: number;
+};
+
 type EmployeeFormData = {
   id: string;
   name: string;
@@ -44,6 +53,10 @@ type EmployeeFormData = {
   residenceAddress: string;
   correspondenceAddress: string;
   salary: string;
+  workingStatus: string;
+  leavesBenefit: string;
+  daysWorking: string;
+  branchId: string;
   remarks: string;
   status: "active" | "inactive";
   workLocation: {
@@ -62,6 +75,7 @@ type EmployeeFormData = {
 type EditEmployeeFormProps = {
   employee: EmployeeFormData;
   activeCount: number;
+  branches: BranchOption[];
 };
 
 const documentFields: Array<{ key: keyof Documents; label: string }> = [
@@ -79,7 +93,7 @@ const documentFields: Array<{ key: keyof Documents; label: string }> = [
   { key: "upiScannerUrl", label: "UPI Scanner" },
 ];
 
-export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProps) {
+export function EditEmployeeForm({ employee, activeCount, branches }: EditEmployeeFormProps) {
   const router = useRouter();
   const [form, setForm] = useState(employee);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +121,19 @@ export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProp
       [group]: {
         ...current[group],
         [key]: value,
+      },
+    }));
+  }
+
+  function handleBranchChange(value: string) {
+    const selected = branches.find((branch) => branch.id === value);
+    setForm((current) => ({
+      ...current,
+      branchId: value,
+      workLocation: {
+        lat: selected ? String(selected.lat) : current.workLocation.lat,
+        lng: selected ? String(selected.lng) : current.workLocation.lng,
+        radius: selected ? String(selected.radius) : current.workLocation.radius,
       },
     }));
   }
@@ -167,6 +194,10 @@ export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProp
         residenceAddress: form.residenceAddress || undefined,
         correspondenceAddress: form.correspondenceAddress || undefined,
         salary: form.salary ? Number(form.salary) : undefined,
+        workingStatus: form.workingStatus,
+        leavesBenefit: form.leavesBenefit,
+        daysWorking: Number(form.daysWorking),
+        branchId: form.branchId || undefined,
         remarks: form.remarks || undefined,
         status: form.status,
         workLocation: {
@@ -200,8 +231,8 @@ export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProp
     setPwError(null);
     setPwSuccess(null);
 
-    if (pwForm.newPassword.length < 8) {
-      setPwError("Password must be at least 8 characters.");
+    if (pwForm.newPassword.length < 4) {
+      setPwError("Password must be at least 4 characters.");
       return;
     }
 
@@ -340,6 +371,15 @@ export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProp
               <Field label="Salary">
                 <TextInput type="number" value={form.salary} onChange={(value) => updateField("salary", value)} />
               </Field>
+              <Field label="Working Status">
+                <TextInput value={form.workingStatus} onChange={(value) => updateField("workingStatus", value)} />
+              </Field>
+              <Field label="Leaves Benefit">
+                <TextInput value={form.leavesBenefit} onChange={(value) => updateField("leavesBenefit", value)} />
+              </Field>
+              <Field label="No of Days Working">
+                <TextInput type="number" value={form.daysWorking} onChange={(value) => updateField("daysWorking", value)} />
+              </Field>
               <Field label="Remarks" className="lg:col-span-3">
                 <TextArea value={form.remarks} onChange={(value) => updateField("remarks", value)} rows={3} />
               </Field>
@@ -349,6 +389,14 @@ export function EditEmployeeForm({ employee, activeCount }: EditEmployeeFormProp
           <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#1e293b]">Attendance and Leave Controls</h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Field label="Working Location (Branch)">
+                <SelectInput
+                  value={form.branchId}
+                  onChange={handleBranchChange}
+                  options={["", ...branches.map((branch) => branch.id)]}
+                  labels={new Map(branches.map((branch) => [branch.id, branch.name]))}
+                />
+              </Field>
               <Field label="Office Latitude" required>
                 <TextInput value={form.workLocation.lat} onChange={(value) => updateNested("workLocation", "lat", value)} required />
               </Field>
@@ -543,10 +591,12 @@ function SelectInput({
   value,
   onChange,
   options,
+  labels,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: string[];
+  labels?: Map<string, string>;
 }) {
   return (
     <select
@@ -556,7 +606,7 @@ function SelectInput({
     >
       {options.map((option) => (
         <option key={option || "empty"} value={option}>
-          {option || "Select"}
+          {option ? labels?.get(option) ?? option : "Custom Location"}
         </option>
       ))}
     </select>

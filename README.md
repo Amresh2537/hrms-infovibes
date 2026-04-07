@@ -16,8 +16,11 @@ Create a `.env.local` file in the project root.
 
 ```bash
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<database>
+MONGODB_DB=abha_hrms
 JWT_SECRET=replace-with-a-long-random-secret
 ```
+
+`MONGODB_DB` is optional but recommended. If your URI does not include a database name, the app will use `MONGODB_DB` (or fallback to `abha_hrms`).
 
 ## Run Locally
 

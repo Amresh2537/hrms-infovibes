@@ -21,8 +21,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return jsonError("New password is required.", 400);
     }
 
-    if (newPassword.length < 8) {
-      return jsonError("Password must be at least 8 characters.", 400);
+    if (newPassword.length < 4) {
+      return jsonError("Password must be at least 4 characters.", 400);
     }
 
     await connectToDatabase();

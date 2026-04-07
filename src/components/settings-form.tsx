@@ -8,6 +8,7 @@ const ALL_DAYS: Day[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
 
 type Shift = { name: string; start: string; end: string; lateThresholdMinutes: number };
 type Holiday = { date: string; name: string; description: string };
+type Branch = { id: string; name: string; address: string; lat: number; lng: number; radius: number };
 
 export type InitialSettings = {
   companyName: string;
@@ -22,6 +23,7 @@ export type InitialSettings = {
   fiscalYearStart: string;
   notifications: { email: boolean; sms: boolean; push: boolean };
   officeLocation: { lat: number; lng: number; radius: number; address: string; allowRemoteCheckIn: boolean };
+  branches: Branch[];
   workingHours: { start: string; end: string; lateThresholdMinutes: number };
   workingDays: Day[];
   attendanceRules: { lateMarkAfter: string; halfDayAfter: string; absentAfter: string; weekends: string[] };
@@ -406,6 +408,123 @@ function LocationSection({ init }: { init: InitialSettings["officeLocation"] }) 
   );
 }
 
+/* ── Section: Branches ── */
+function BranchesSection({ init }: { init: InitialSettings["branches"] }) {
+  const [branches, setBranches] = useState<Branch[]>(init);
+  const [newBranch, setNewBranch] = useState<Branch>({
+    id: "",
+    name: "",
+    address: "",
+    lat: 28.6139,
+    lng: 77.209,
+    radius: 500,
+  });
+  const { save, isPending, status, errMsg } = useSave();
+
+  function saveBranches(updated: Branch[]) {
+    save({ branches: updated.map(({ name, address, lat, lng, radius }) => ({ name, address, lat, lng, radius })) });
+  }
+
+  function addBranch() {
+    if (!newBranch.name.trim()) return;
+    const updated = [
+      ...branches,
+      { ...newBranch, id: `${Date.now()}` },
+    ];
+    setBranches(updated);
+    setNewBranch({ id: "", name: "", address: "", lat: 28.6139, lng: 77.209, radius: 500 });
+    saveBranches(updated);
+  }
+
+  function removeBranch(index: number) {
+    const updated = branches.filter((_, i) => i !== index);
+    setBranches(updated);
+    saveBranches(updated);
+  }
+
+  return (
+    <div className={cls.card}>
+      <div className="mb-5 border-b border-[#f1f5f9] pb-4">
+        <h2 className="text-base font-semibold text-[#1e293b]">Branch Locations</h2>
+        <p className="text-xs text-[#94a3b8]">Add all office branches with location coordinates and radius.</p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="block space-y-1.5">
+          <span className={cls.label}>Branch Name</span>
+          <input type="text" className={cls.input} value={newBranch.name} onChange={(e) => setNewBranch((p) => ({ ...p, name: e.target.value }))} />
+        </label>
+        <label className="block space-y-1.5">
+          <span className={cls.label}>Address</span>
+          <input type="text" className={cls.input} value={newBranch.address} onChange={(e) => setNewBranch((p) => ({ ...p, address: e.target.value }))} />
+        </label>
+        <label className="block space-y-1.5">
+          <span className={cls.label}>Latitude</span>
+          <input type="number" step="any" className={cls.input} value={newBranch.lat} onChange={(e) => setNewBranch((p) => ({ ...p, lat: Number(e.target.value) }))} />
+        </label>
+        <label className="block space-y-1.5">
+          <span className={cls.label}>Longitude</span>
+          <input type="number" step="any" className={cls.input} value={newBranch.lng} onChange={(e) => setNewBranch((p) => ({ ...p, lng: Number(e.target.value) }))} />
+        </label>
+        <label className="block space-y-1.5 md:col-span-2">
+          <span className={cls.label}>Radius (meters)</span>
+          <input type="number" min="1" className={cls.input} value={newBranch.radius} onChange={(e) => setNewBranch((p) => ({ ...p, radius: Number(e.target.value) }))} />
+        </label>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={addBranch}
+          disabled={isPending || !newBranch.name.trim()}
+          className="rounded-lg border border-[#4f46e5] px-4 py-2 text-sm font-semibold text-[#4f46e5] transition hover:bg-[#4f46e5] hover:text-white disabled:opacity-50"
+        >
+          {isPending ? "Saving…" : "+ Add Branch"}
+        </button>
+        {status === "ok" && <span className="text-sm text-emerald-600">Saved.</span>}
+        {status === "error" && <span className="text-sm text-red-500">{errMsg}</span>}
+      </div>
+
+      {branches.length > 0 ? (
+        <div className="mt-4 overflow-x-auto rounded-lg border border-[#e2e8f0]">
+          <table className="min-w-full text-sm">
+            <thead className="bg-[#f8fafc]">
+              <tr>
+                {[
+                  "Branch",
+                  "Address",
+                  "Latitude",
+                  "Longitude",
+                  "Radius",
+                  "Action",
+                ].map((h) => (
+                  <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[#94a3b8]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#f1f5f9]">
+              {branches.map((branch, index) => (
+                <tr key={branch.id || `${branch.name}-${index}`}>
+                  <td className="px-4 py-2.5 font-medium text-[#1e293b]">{branch.name}</td>
+                  <td className="px-4 py-2.5 text-[#64748b]">{branch.address}</td>
+                  <td className="px-4 py-2.5 text-[#64748b]">{branch.lat}</td>
+                  <td className="px-4 py-2.5 text-[#64748b]">{branch.lng}</td>
+                  <td className="px-4 py-2.5 text-[#64748b]">{branch.radius}</td>
+                  <td className="px-4 py-2.5">
+                    <button onClick={() => removeBranch(index)} disabled={isPending} className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /* ── Section: Holiday Calendar ── */
 function HolidaySection({ init }: { init: Holiday[] }) {
   const [holidays, setHolidays] = useState<Holiday[]>(init);
@@ -559,6 +678,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: InitialSett
       <AttendanceSection init={s.attendanceRules} initDays={s.workingDays} />
       <PayrollSection init={s.payroll} />
       <LocationSection init={s.officeLocation} />
+      <BranchesSection init={s.branches} />
       <HolidaySection init={s.holidays} />
       <SecuritySection init={s.security} />
     </div>

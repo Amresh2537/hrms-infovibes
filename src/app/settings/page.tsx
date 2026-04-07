@@ -38,6 +38,14 @@ export default async function SettingsPage() {
       address: s.officeLocation?.address ?? "",
       allowRemoteCheckIn: s.officeLocation?.allowRemoteCheckIn ?? false,
     },
+    branches: (s.branches ?? []).map((b) => ({
+      id: String(b._id),
+      name: b.name,
+      address: b.address ?? "",
+      lat: b.lat,
+      lng: b.lng,
+      radius: b.radius ?? 500,
+    })),
     workingHours: {
       start: s.workingHours?.start ?? "09:00",
       end: s.workingHours?.end ?? "18:00",

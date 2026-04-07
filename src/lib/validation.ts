@@ -3,14 +3,14 @@ import { z } from "zod";
 export const registerSchema = z.object({
   name: z.string().min(2),
   email: z.email(),
-  password: z.string().min(6),
+  password: z.string().min(4),
   role: z.enum(["HR", "EMPLOYEE"]),
   employeeId: z.string().optional(),
 });
 
 export const loginSchema = z.object({
   email: z.email(),
-  password: z.string().min(6),
+  password: z.string().min(4),
 });
 
 export const employeeSchema = z.object({
@@ -30,6 +30,10 @@ export const employeeSchema = z.object({
   residenceAddress: z.string().optional(),
   correspondenceAddress: z.string().optional(),
   salary: z.number().nonnegative().optional(),
+  workingStatus: z.string().min(1).optional(),
+  leavesBenefit: z.string().min(1).optional(),
+  daysWorking: z.number().int().min(1).max(7).optional(),
+  branchId: z.string().optional(),
   workLocation: z.object({
     lat: z.number(),
     lng: z.number(),
@@ -62,7 +66,7 @@ export const employeeSchema = z.object({
   }).optional(),
   remarks: z.string().optional(),
   status: z.enum(["active", "inactive"]).default("active"),
-  password: z.string().min(6).optional(),
+  password: z.string().min(4).optional(),
 });
 
 export const attendanceCheckInSchema = z.object({
@@ -99,6 +103,14 @@ const holidaySchema = z.object({
   description: z.string().default(""),
 });
 
+const branchSchema = z.object({
+  name: z.string().min(1),
+  address: z.string().default(""),
+  lat: z.number(),
+  lng: z.number(),
+  radius: z.number().positive().default(500),
+});
+
 export const settingsSchema = z.object({
   // Company
   companyName: z.string().min(1),
@@ -126,6 +138,7 @@ export const settingsSchema = z.object({
     address: z.string().default(""),
     allowRemoteCheckIn: z.boolean().default(false),
   }),
+  branches: z.array(branchSchema).default([]),
   // Working hours
   workingHours: z.object({
     start: z.string().regex(/^\d{2}:\d{2}$/, "Must be HH:MM"),

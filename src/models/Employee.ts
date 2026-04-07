@@ -18,6 +18,10 @@ const employeeSchema = new Schema(
     residenceAddress: { type: String, trim: true },
     correspondenceAddress: { type: String, trim: true },
     salary: { type: Number },
+    workingStatus: { type: String, trim: true, default: "Full-time" },
+    leavesBenefit: { type: String, trim: true, default: "Standard" },
+    daysWorking: { type: Number, default: 5 },
+    branchId: { type: String, trim: true, default: "" },
     workLocation: {
       lat: { type: Number, required: true },
       lng: { type: Number, required: true },

@@ -1,8 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { handleRouteError, jsonOk } from "@/lib/api";
+import { handleRouteError, jsonError, jsonOk } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
-import { settingsSchema } from "@/lib/validation";
 import Settings from "@/models/Settings";
 
 export async function GET() {
@@ -25,9 +24,37 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     await requireRole("HR");
-    const body = await request.json();
-    // Accept partial updates — each settings section sends only its own fields
-    const payload = settingsSchema.partial().parse(body);
+    const body = (await request.json()) as Record<string, unknown>;
+    const payload: Record<string, unknown> = { ...body };
+
+    if (payload.officeLocation && typeof payload.officeLocation === "object") {
+      const office = payload.officeLocation as Record<string, unknown>;
+      payload.officeLocation = {
+        ...office,
+        ...(office.lat != null ? { lat: Number(office.lat) } : {}),
+        ...(office.lng != null ? { lng: Number(office.lng) } : {}),
+        ...(office.radius != null ? { radius: Number(office.radius) } : {}),
+      };
+    }
+
+    if (Array.isArray(payload.branches)) {
+      payload.branches = payload.branches
+        .map((branch) => {
+          const row = branch as Record<string, unknown>;
+          return {
+            name: String(row.name ?? "").trim(),
+            address: String(row.address ?? "").trim(),
+            lat: Number(row.lat),
+            lng: Number(row.lng),
+            radius: Number(row.radius ?? 500),
+          };
+        })
+        .filter((branch) => branch.name && Number.isFinite(branch.lat) && Number.isFinite(branch.lng) && branch.radius > 0);
+    }
+
+    if (!Object.keys(payload).length) {
+      return jsonError("No settings payload provided.", 400);
+    }
 
     await connectToDatabase();
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import Employee from "@/models/Employee";
+import Settings from "@/models/Settings";
 import { EditEmployeeForm } from "@/components/edit-employee-form";
 
 type PageProps = {
@@ -13,18 +14,30 @@ export default async function EditEmployeePage({ params }: PageProps) {
   await connectToDatabase();
 
   const { id } = await params;
-  const employee = await Employee.findById(id).lean();
+  const [employee, settings] = await Promise.all([
+    Employee.findById(id).lean(),
+    Settings.findOne({ singleton: "global" }).lean(),
+  ]);
 
   if (!employee) {
     notFound();
   }
 
   const activeCount = await Employee.countDocuments({ status: "active" });
+  const branches = (settings?.branches ?? []).map((branch) => ({
+    id: String(branch._id),
+    name: branch.name,
+    address: branch.address ?? "",
+    lat: branch.lat,
+    lng: branch.lng,
+    radius: branch.radius ?? 500,
+  }));
 
   return (
     <div className="p-6 md:p-8">
       <EditEmployeeForm
         activeCount={activeCount}
+        branches={branches}
         employee={{
           id: String(employee._id),
           name: employee.name,
@@ -43,6 +56,10 @@ export default async function EditEmployeePage({ params }: PageProps) {
           residenceAddress: employee.residenceAddress ?? "",
           correspondenceAddress: employee.correspondenceAddress ?? "",
           salary: employee.salary != null ? String(employee.salary) : "",
+          workingStatus: employee.workingStatus ?? "Full-time",
+          leavesBenefit: employee.leavesBenefit ?? "Standard",
+          daysWorking: String(employee.daysWorking ?? 5),
+          branchId: employee.branchId ?? "",
           remarks: employee.remarks ?? "",
           status: employee.status === "inactive" ? "inactive" : "active",
           workLocation: {

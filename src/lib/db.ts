@@ -25,8 +25,23 @@ export async function connectToDatabase() {
   }
 
   if (!cache.promise) {
+    let dbName = process.env.MONGODB_DB;
+
+    if (!dbName) {
+      try {
+        const parsed = new URL(mongoUri);
+        const pathDb = parsed.pathname.replace(/^\//, "").trim();
+        if (pathDb) {
+          dbName = pathDb;
+        }
+      } catch {
+        dbName = undefined;
+      }
+    }
+
     cache.promise = mongoose.connect(mongoUri, {
       bufferCommands: false,
+      dbName: dbName || "abha_hrms",
     });
   }
 

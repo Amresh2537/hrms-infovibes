@@ -1,14 +1,28 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import Employee from "@/models/Employee";
+import Settings from "@/models/Settings";
 import { CreateEmployeeForm } from "@/components/create-employee-form";
+import { EmployeeRowActions } from "@/components/employee-row-actions";
+import { EmployeesHeaderActions } from "@/components/employees-header-actions";
 import { formatDate } from "@/lib/date";
 
 export default async function HrEmployeesPage() {
   await requireRole("HR");
   await connectToDatabase();
-  const employees = await Employee.find().sort({ createdAt: -1 }).lean();
+  const [employees, settings] = await Promise.all([
+    Employee.find().sort({ createdAt: -1 }).lean(),
+    Settings.findOne({ singleton: "global" }).lean(),
+  ]);
+
+  const branches = (settings?.branches ?? []).map((branch) => ({
+    id: String(branch._id),
+    name: branch.name,
+    address: branch.address ?? "",
+    lat: branch.lat,
+    lng: branch.lng,
+    radius: branch.radius ?? 500,
+  }));
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -20,30 +34,21 @@ export default async function HrEmployeesPage() {
             A list of all employees in your company including their name, department, position and status.
           </p>
         </div>
-        <div className="flex gap-3">
-          <Link
-            href="/dashboard/hr/employees/export"
-            className="flex items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm font-semibold text-[#1e293b] shadow-sm transition hover:bg-[#f8fafc]"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export CSV
-          </Link>
-        </div>
+        <EmployeesHeaderActions />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-        {/* Employee table */}
-        <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+      <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Department</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Position</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Working Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Leaves Benefit</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">No of Days Working</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Working Location</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Joined</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">CL / SL</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
@@ -53,7 +58,7 @@ export default async function HrEmployeesPage() {
               <tbody className="divide-y divide-[#e2e8f0]">
                 {employees.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-[#64748b]">
+                    <td colSpan={12} className="px-6 py-10 text-center text-sm text-[#64748b]">
                       No employees yet. Add one using the form.
                     </td>
                   </tr>
@@ -76,6 +81,12 @@ export default async function HrEmployeesPage() {
                         </td>
                         <td className="px-6 py-4 text-[#475569]">{emp.department}</td>
                         <td className="px-6 py-4 text-[#475569]">{emp.designation}</td>
+                        <td className="px-6 py-4 text-[#475569]">{emp.workingStatus ?? "Full-time"}</td>
+                        <td className="px-6 py-4 text-[#475569]">{emp.leavesBenefit ?? "Standard"}</td>
+                        <td className="px-6 py-4 text-[#475569]">{emp.daysWorking ?? 5}</td>
+                        <td className="px-6 py-4 text-[#475569]">
+                          {branches.find((branch) => branch.id === (emp.branchId ?? ""))?.name ?? "Custom Location"}
+                        </td>
                         <td className="px-6 py-4 text-[#475569]">{formatDate(emp.joinDate)}</td>
                         <td className="px-6 py-4 text-[#475569]">{lb.CL} / {lb.SL}</td>
                         <td className="px-6 py-4">
@@ -90,25 +101,18 @@ export default async function HrEmployeesPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <Link
-                            href={`/dashboard/hr/employees/${String(emp._id)}/edit`}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 text-xs font-semibold text-[#1e293b] shadow-sm transition hover:bg-[#f0fdf4] hover:border-[#0f766e] hover:text-[#0f766e]"
-                          >
-                            Edit
-                          </Link>
+                          <EmployeeRowActions employeeId={String(emp._id)} employeeName={emp.name} />
                         </td>
                       </tr>
                     );
                   })
                 )}
               </tbody>
-            </table>
-          </div>
+          </table>
         </div>
-
-        {/* Add employee form */}
-        <CreateEmployeeForm />
       </div>
+
+      <CreateEmployeeForm branches={branches} />
     </div>
   );
 }

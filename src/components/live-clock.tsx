@@ -28,13 +28,10 @@ function getISTString(type: "time" | "date"): string {
 }
 
 export function LiveClock({ variant = "card" }: LiveClockProps) {
-  const [time, setTime] = useState(() => getISTString("time"));
-  const [date, setDate] = useState(() => getISTString("date"));
+  const [time, setTime] = useState("--:--:--");
+  const [date, setDate] = useState("Loading date...");
 
   useEffect(() => {
-    setTime(getISTString("time"));
-    setDate(getISTString("date"));
-
     const id = setInterval(() => {
       setTime(getISTString("time"));
       setDate(getISTString("date"));
