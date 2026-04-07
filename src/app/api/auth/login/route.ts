@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import { comparePassword, setAuthCookie, signAuthToken } from "@/lib/auth";
 import { handleRouteError, jsonError, jsonOk } from "@/lib/api";
 import { loginSchema } from "@/lib/validation";
+import { ensureBootstrapAdmin } from "@/lib/bootstrap";
 import User from "@/models/User";
 
 export async function POST(request: NextRequest) {
@@ -11,6 +12,7 @@ export async function POST(request: NextRequest) {
     const payload = loginSchema.parse(body);
 
     await connectToDatabase();
+    await ensureBootstrapAdmin();
 
     const user = await User.findOne({ email: payload.email.toLowerCase() });
 

@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { getCookieName, isApiPath } from "@/lib/auth";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "replace-me-in-production");
+const jwtSecret = process.env.JWT_SECRET ?? (process.env.NODE_ENV === "production" ? "" : "replace-me-in-production");
+
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET is not configured for production.");
+}
+
+const secret = new TextEncoder().encode(jwtSecret);
 
 const protectedPrefixes = ["/dashboard", "/attendance", "/leave", "/reports", "/api"];
 const hrOnlyPrefixes = ["/dashboard/hr", "/reports", "/api/employees", "/api/reports", "/api/leave/approve"];

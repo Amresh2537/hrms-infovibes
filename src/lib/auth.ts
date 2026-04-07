@@ -5,7 +5,12 @@ import bcrypt from "bcryptjs";
 
 const COOKIE_NAME = "abha_session";
 const DEFAULT_SECRET = "replace-me-in-production";
-const JWT_SECRET = process.env.JWT_SECRET ?? DEFAULT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET ?? (process.env.NODE_ENV === "production" ? "" : DEFAULT_SECRET);
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not configured for production.");
+}
+
 const secret = new TextEncoder().encode(JWT_SECRET);
 
 export type SessionPayload = {

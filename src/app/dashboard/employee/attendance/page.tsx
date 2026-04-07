@@ -85,7 +85,7 @@ export default async function EmployeeAttendancePage() {
         </div>
         <div className="mt-3 rounded-lg bg-[#f0fdf4] px-4 py-2 text-xs text-[#166534]">
           Office shift starts at <strong>{rules.officeStartTime}</strong>. Arriving inside the
-          designated radius marks you as on-site. Outside = "Outside Location".
+          designated radius marks you as on-site. Outside = &quot;Outside Location&quot;.
         </div>
       </div>
 

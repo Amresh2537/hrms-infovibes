@@ -60,6 +60,8 @@ export default function HrLeavesPage() {
   }
 
   useEffect(() => {
+    // Fetching on filter change is intentional for this page's UX.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData(statusFilter);
   }, [statusFilter]);
 
