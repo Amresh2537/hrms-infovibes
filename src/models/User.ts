@@ -7,6 +7,8 @@ const userSchema = new Schema(
     password: { type: String, required: true },
     role: { type: String, enum: ["HR", "EMPLOYEE"], required: true },
     employeeId: { type: Schema.Types.ObjectId, ref: "Employee" },
+    resetPasswordTokenHash: { type: String },
+    resetPasswordExpiresAt: { type: Date },
   },
   {
     timestamps: true,

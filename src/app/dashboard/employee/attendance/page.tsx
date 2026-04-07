@@ -134,7 +134,20 @@ export default async function EmployeeAttendancePage() {
               No attendance marked for today yet.
             </div>
           )}
-          <AttendanceActions hasCheckedIn={Boolean(todayAttendance?.checkInTime)} />
+          <AttendanceActions
+            hasCheckedIn={Boolean(todayAttendance?.checkInTime)}
+            employeeName={employee.name}
+            shiftStart={rules.officeStartTime}
+            shiftEnd={rules.officeEndTime}
+            officePosition={
+              employee.workLocation
+                ? {
+                    lat: employee.workLocation.lat,
+                    lng: employee.workLocation.lng,
+                  }
+                : undefined
+            }
+          />
         </div>
 
         {/* Monthly summary */}

@@ -472,20 +472,18 @@ export function EditEmployeeForm({ employee, activeCount, branches }: EditEmploy
             ) : null}
 
             <div className="mt-4 space-y-4">
-              <Field label="New Password" required>
+              <Field label="New Password">
                 <TextInput
                   type="password"
                   value={pwForm.newPassword}
                   onChange={(value) => setPwForm((prev) => ({ ...prev, newPassword: value }))}
-                  required
                 />
               </Field>
-              <Field label="Confirm Password" required>
+              <Field label="Confirm Password">
                 <TextInput
                   type="password"
                   value={pwForm.confirmPassword}
                   onChange={(value) => setPwForm((prev) => ({ ...prev, confirmPassword: value }))}
-                  required
                 />
               </Field>
             </div>

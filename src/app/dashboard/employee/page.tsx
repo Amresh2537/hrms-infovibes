@@ -91,7 +91,18 @@ export default async function EmployeeDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <div className="space-y-6">
-          <AttendanceActions hasCheckedIn={Boolean(data.todayAttendance?.checkInTime)} />
+          <AttendanceActions
+            hasCheckedIn={Boolean(data.todayAttendance?.checkInTime)}
+            employeeName={data.employee.name}
+            officePosition={
+              data.employee.workLocation
+                ? {
+                    lat: data.employee.workLocation.lat,
+                    lng: data.employee.workLocation.lng,
+                  }
+                : undefined
+            }
+          />
           <LeaveForm />
         </div>
 

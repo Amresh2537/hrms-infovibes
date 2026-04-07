@@ -3,6 +3,7 @@ import Settings from "@/models/Settings";
 
 export type AttendanceRules = {
   officeStartTime: string;  // e.g. "09:00" — shift start
+  officeEndTime: string;    // e.g. "18:00" — shift end
   lateMarkAfter: string;    // e.g. "09:15" — after this = Late
   halfDayAfter: string;     // e.g. "10:00" — after this = Half Day
   absentAfter: string;      // e.g. "13:00" — after this = Absent (cannot check in)
@@ -14,6 +15,7 @@ export async function getAttendanceRules(): Promise<AttendanceRules> {
 
   return {
     officeStartTime: settings?.workingHours?.start ?? "09:00",
+    officeEndTime: settings?.workingHours?.end ?? "18:00",
     lateMarkAfter: settings?.attendanceRules?.lateMarkAfter ?? "09:15",
     halfDayAfter: settings?.attendanceRules?.halfDayAfter ?? "10:00",
     absentAfter: settings?.attendanceRules?.absentAfter ?? "13:00",

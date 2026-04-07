@@ -13,6 +13,15 @@ export const loginSchema = z.object({
   password: z.string().min(4),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(20),
+  newPassword: z.string().min(4),
+});
+
 export const employeeSchema = z.object({
   name: z.string().min(2),
   empCode: z.string().min(2),

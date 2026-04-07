@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -99,6 +100,12 @@ export function LoginForm() {
             </button>
           </div>
         </label>
+
+        <div className="text-right">
+          <Link href="/forgot-password" className="text-sm font-semibold text-brand hover:underline">
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       {error ? (
