@@ -22,13 +22,14 @@ export async function GET(
       return jsonError("File not found.", 404);
     }
 
+    const fileBytes = new Uint8Array(upload.data as ArrayLike<number>);
     const fileName = (upload.originalName || "file").replace(/[\r\n"]/g, "_");
 
-    return new Response(upload.data, {
+    return new Response(fileBytes, {
       status: 200,
       headers: {
         "Content-Type": upload.mimeType || "application/octet-stream",
-        "Content-Length": String(upload.size || upload.data.length || 0),
+        "Content-Length": String(upload.size || fileBytes.byteLength || 0),
         "Content-Disposition": `inline; filename="${fileName}"`,
         "Cache-Control": "public, max-age=31536000, immutable",
       },
