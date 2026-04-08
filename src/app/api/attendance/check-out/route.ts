@@ -6,6 +6,8 @@ import { endOfDay, startOfDay } from "@/lib/date";
 import { attendanceCheckOutSchema } from "@/lib/validation";
 import Attendance from "@/models/Attendance";
 
+const MIN_CHECKOUT_DELAY_MINUTES = 5;
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireSession();
@@ -32,6 +34,15 @@ export async function POST(request: NextRequest) {
 
     if (attendance.checkOutTime) {
       return jsonError("Check-out has already been recorded for today.", 409);
+    }
+
+    const elapsedMs = Date.now() - new Date(attendance.checkInTime).getTime();
+    const minAllowedMs = MIN_CHECKOUT_DELAY_MINUTES * 60 * 1000;
+    if (elapsedMs < minAllowedMs) {
+      return jsonError(
+        `You can check out only after ${MIN_CHECKOUT_DELAY_MINUTES} minutes from check-in.`,
+        400,
+      );
     }
 
     attendance.checkOutTime = new Date();
