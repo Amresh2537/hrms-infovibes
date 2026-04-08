@@ -11,19 +11,21 @@ type BeforeInstallPromptEvent = Event & {
 export function InstallAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalling, setIsInstalling] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const ua = window.navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(ua));
+    // Hide if already running as installed PWA
+    if (window.matchMedia("(display-mode: standalone)").matches) return;
 
     function onBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
+      setIsVisible(true);
     }
 
     function onAppInstalled() {
       setDeferredPrompt(null);
+      setIsVisible(false);
       setIsInstalling(false);
     }
 
@@ -37,32 +39,25 @@ export function InstallAppButton() {
   }, []);
 
   async function handleInstall() {
-    if (isInstalling) return;
-
-    if (!deferredPrompt) {
-      if (isIOS) {
-        alert("On iPhone: open Share menu and tap 'Add to Home Screen'.");
-      } else {
-        alert("Install is not available right now. Open your browser menu and choose 'Install app' or 'Add to Home screen'.");
-      }
-      return;
-    }
-
+    if (!deferredPrompt || isInstalling) return;
     setIsInstalling(true);
     try {
       await deferredPrompt.prompt();
       await deferredPrompt.userChoice;
     } finally {
       setDeferredPrompt(null);
+      setIsVisible(false);
       setIsInstalling(false);
     }
   }
+
+  if (!isVisible) return null;
 
   return (
     <button
       type="button"
       onClick={handleInstall}
-      className="inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-white sm:hidden"
+      className="inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-white"
       aria-label="Install Abha HRMS"
     >
       <Image
