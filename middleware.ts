@@ -26,7 +26,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/auth/logout") ||
     pathname.startsWith("/api/auth/me") ||
     pathname.startsWith("/api/auth/forgot-password") ||
-    pathname.startsWith("/api/auth/reset-password")
+    pathname.startsWith("/api/auth/reset-password") ||
+    ((request.method === "GET" || request.method === "HEAD") &&
+      pathname.startsWith("/api/upload/"))
   ) {
     return NextResponse.next();
   }

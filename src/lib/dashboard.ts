@@ -38,7 +38,8 @@ export async function getHrDashboardData() {
       .lean(),
     Attendance.countDocuments({
       date: { $gte: todayStart, $lte: todayEnd },
-      status: { $in: ["Present", "Late"] },
+      checkInTime: { $ne: null },
+      status: { $ne: "Absent" },
     }),
     Leave.countDocuments({
       status: "Approved",

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { requireSession } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/db";
 import { handleRouteError, jsonOk } from "@/lib/api";
+import Upload from "@/models/Upload";
 
 const ALLOWED_MIME = new Set([
   "image/jpeg",
@@ -13,14 +13,10 @@ const ALLOWED_MIME = new Set([
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
-// Sanitize filename: keep only alphanumeric, dash, underscore, dot
-function sanitizeFilename(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 100);
-}
-
 export async function POST(request: NextRequest) {
   try {
     await requireSession();
+    await connectToDatabase();
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -41,16 +37,14 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "File exceeds 5 MB limit." }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    const upload = await Upload.create({
+      originalName: file.name || "upload.bin",
+      mimeType: file.type || "application/octet-stream",
+      size: arrayBuffer.byteLength,
+      data: Buffer.from(arrayBuffer),
+    });
 
-    const ext = path.extname(file.name) || ".bin";
-    const safeName = `${Date.now()}-${sanitizeFilename(path.basename(file.name, ext))}${ext}`;
-    const filePath = path.join(uploadDir, safeName);
-
-    await writeFile(filePath, Buffer.from(arrayBuffer));
-
-    return jsonOk({ url: `/uploads/${safeName}` });
+    return jsonOk({ url: `/api/upload/${String(upload._id)}` });
   } catch (error) {
     return handleRouteError(error);
   }

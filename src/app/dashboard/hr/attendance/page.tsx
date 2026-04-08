@@ -81,7 +81,7 @@ export default function HrAttendancePage() {
   }, []);
 
   const total = rows.length;
-  const present = rows.filter((r) => r.status === "Present" || r.status === "Late").length;
+  const present = rows.filter((r) => !!r.checkInTime && r.status !== "Absent").length;
   const absent = rows.filter((r) => r.status === "Absent").length;
   const late = rows.filter((r) => r.status === "Late").length;
 
