@@ -8,6 +8,7 @@ type AttendanceRow = {
   empCode: string;
   department: string;
   designation: string;
+  date: string | null;
   checkInTime: string | null;
   checkOutTime: string | null;
   status: "Present" | "Absent" | "Late" | "Outside Location" | "WorkFromHome";
@@ -55,6 +56,41 @@ export default function HrAttendancePage() {
   const [departments, setDepartments] = useState<string[]>([]);
   const [rows, setRows] = useState<AttendanceRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(row: AttendanceRow) {
+    if (!row.checkInTime && row.status === "Absent") {
+      alert("This employee has no attendance record to delete.");
+      return;
+    }
+    const dateLabel = row.checkInTime
+      ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" }).format(new Date(row.checkInTime))
+      : row.date
+        ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" }).format(new Date(row.date))
+        : "Unknown date";
+    if (!confirm(`Delete attendance record for ${row.name} on ${dateLabel}? This cannot be undone.`)) return;
+
+    const recordDate = row.checkInTime ?? row.date;
+    if (!recordDate) return;
+
+    const isoDate = new Date(recordDate).toISOString().slice(0, 10);
+    const key = `${row.employeeId}|${isoDate}`;
+    setDeletingId(key);
+    try {
+      const res = await fetch(
+        `/api/attendance?employeeId=${encodeURIComponent(row.employeeId)}&date=${isoDate}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        alert(data.error ?? "Delete failed.");
+        return;
+      }
+      setRows((prev) => prev.filter((r) => !(r.employeeId === row.employeeId && r.checkInTime === row.checkInTime)));
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   async function fetchData() {
     setLoading(true);
@@ -220,6 +256,7 @@ export default function HrAttendancePage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">WFH Activity</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Proof</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#64748b]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]">
@@ -260,17 +297,31 @@ export default function HrAttendancePage() {
                         {row.isWFH ? fmtDateTime(row.lastActiveAt) : "—"}
                       </td>
                       <td className="px-6 py-4 text-xs text-[#475569]">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-2">
                           {row.selfieUrl ? (
-                            <a href={row.selfieUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] hover:underline">
-                              Check-in Proof
+                            <a href={row.selfieUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[#0f766e] hover:underline">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={row.selfieUrl}
+                                alt="Check-in proof"
+                                className="h-10 w-10 rounded-md border border-[#dbe5ef] object-cover"
+                                loading="lazy"
+                              />
+                              <span>Check-in Proof</span>
                             </a>
                           ) : (
                             <span className="text-[#94a3b8]">Check-in: -</span>
                           )}
                           {row.checkOutSelfieUrl ? (
-                            <a href={row.checkOutSelfieUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] hover:underline">
-                              Check-out Proof
+                            <a href={row.checkOutSelfieUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[#0f766e] hover:underline">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={row.checkOutSelfieUrl}
+                                alt="Check-out proof"
+                                className="h-10 w-10 rounded-md border border-[#dbe5ef] object-cover"
+                                loading="lazy"
+                              />
+                              <span>Check-out Proof</span>
                             </a>
                           ) : (
                             <span className="text-[#94a3b8]">Check-out: -</span>
@@ -285,6 +336,27 @@ export default function HrAttendancePage() {
                         >
                           {row.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {row.status !== "Absent" || row.checkInTime ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(row)}
+                            disabled={deletingId === `${row.employeeId}|${(row.checkInTime ?? row.date ?? "").slice(0, 10)}`}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#fecaca] bg-[#fff5f5] px-2.5 py-1 text-xs font-medium text-[#dc2626] transition hover:bg-[#fee2e2] disabled:opacity-50"
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                              <path d="M10 11v6" />
+                              <path d="M14 11v6" />
+                              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                            </svg>
+                            {deletingId === `${row.employeeId}|${(row.checkInTime ?? row.date ?? "").slice(0, 10)}` ? "Deleting…" : "Delete"}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-[#cbd5e1]">—</span>
+                        )}
                       </td>
                     </tr>
                   ))

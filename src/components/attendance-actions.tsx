@@ -42,6 +42,76 @@ function getCurrentPosition() {
   });
 }
 
+const MAX_UPLOAD_IMAGE_BYTES = 900 * 1024;
+const MAX_IMAGE_DIMENSION = 1280;
+
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+  });
+}
+
+function getFileBaseName(name: string) {
+  const dotIndex = name.lastIndexOf(".");
+  return dotIndex > 0 ? name.slice(0, dotIndex) : name;
+}
+
+async function compressImageIfNeeded(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  if (file.size <= MAX_UPLOAD_IMAGE_BYTES) return file;
+
+  const previewUrl = URL.createObjectURL(file);
+
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Could not read selected image."));
+      image.src = previewUrl;
+    });
+
+    const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+    const width = Math.max(1, Math.round(img.width * scale));
+    const height = Math.max(1, Math.round(img.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const qualities = [0.8, 0.7, 0.6, 0.5, 0.4];
+    let bestBlob: Blob | null = null;
+
+    for (const quality of qualities) {
+      const blob = await canvasToBlob(canvas, quality);
+      if (!blob) continue;
+
+      if (!bestBlob || blob.size < bestBlob.size) {
+        bestBlob = blob;
+      }
+
+      if (blob.size <= MAX_UPLOAD_IMAGE_BYTES) {
+        bestBlob = blob;
+        break;
+      }
+    }
+
+    if (!bestBlob || bestBlob.size >= file.size) {
+      return file;
+    }
+
+    return new File([bestBlob], `${getFileBaseName(file.name)}.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(previewUrl);
+  }
+}
+
 async function uploadFile(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
@@ -206,7 +276,8 @@ export function AttendanceActions({
     if (!selfieFile) return null;
     setIsUploadingSelfie(true);
     try {
-      return await uploadFile(selfieFile);
+      const uploadFileCandidate = await compressImageIfNeeded(selfieFile);
+      return await uploadFile(uploadFileCandidate);
     } finally {
       setIsUploadingSelfie(false);
     }

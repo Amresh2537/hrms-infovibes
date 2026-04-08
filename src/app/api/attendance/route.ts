@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { handleRouteError, jsonOk } from "@/lib/api";
+import { handleRouteError, jsonError, jsonOk } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { startOfDay, endOfDay } from "@/lib/date";
 import Attendance from "@/models/Attendance";
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
         empCode: emp.empCode,
         department: emp.department,
         designation: emp.designation,
+        date: record?.date?.toISOString() ?? null,
         checkInTime: record?.checkInTime ?? null,
         checkOutTime: record?.checkOutTime ?? null,
         status: record?.status ?? "Absent",
@@ -72,6 +73,43 @@ export async function GET(request: NextRequest) {
     });
 
     return jsonOk({ rows, departments });
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+// DELETE /api/attendance?employeeId=...&date=YYYY-MM-DD
+export async function DELETE(request: NextRequest) {
+  try {
+    await requireRole("HR");
+    await connectToDatabase();
+
+    const { searchParams } = new URL(request.url);
+    const employeeId = searchParams.get("employeeId");
+    const dateParam = searchParams.get("date");
+
+    if (!employeeId || !dateParam) {
+      return jsonError("employeeId and date are required.", 400);
+    }
+
+    const targetDate = new Date(dateParam);
+    if (isNaN(targetDate.getTime())) {
+      return jsonError("Invalid date.", 400);
+    }
+
+    const dayStart = startOfDay(targetDate);
+    const dayEnd = endOfDay(targetDate);
+
+    const result = await Attendance.findOneAndDelete({
+      employeeId,
+      date: { $gte: dayStart, $lte: dayEnd },
+    });
+
+    if (!result) {
+      return jsonError("Attendance record not found.", 404);
+    }
+
+    return jsonOk({ success: true });
   } catch (error) {
     return handleRouteError(error);
   }
