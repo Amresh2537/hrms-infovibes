@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LiveClock } from "@/components/live-clock";
+import { InstallAppButton } from "@/components/install-app-button";
 
 const modules = [
   {
@@ -35,7 +36,10 @@ export default function Home() {
 
           <div className="relative grid gap-8 xl:grid-cols-[1.18fr_0.82fr] xl:items-start">
             <div className="max-w-3xl space-y-6 md:space-y-8">
-              <div className="chip text-brand">Workforce Operations Platform</div>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="chip text-brand">Workforce Operations Platform</div>
+                <InstallAppButton />
+              </div>
               <div className="space-y-4 md:space-y-5">
                 <h1 className="max-w-4xl text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-5xl md:text-6xl xl:text-7xl">
                   Operational HR software with a sharper executive feel.
