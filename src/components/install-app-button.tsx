@@ -43,7 +43,7 @@ export function InstallAppButton() {
       if (isIOS) {
         alert("On iPhone: open Share menu and tap 'Add to Home Screen'.");
       } else {
-        alert("Install option will appear when PWA install is supported in this browser.");
+        alert("Install is not available right now. Open your browser menu and choose 'Install app' or 'Add to Home screen'.");
       }
       return;
     }
